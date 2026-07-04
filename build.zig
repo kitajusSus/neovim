@@ -246,7 +246,7 @@ pub fn build(b: *std.Build) !void {
     const unix_only = [_][]const u8{ "unix_defs.h", "pty_proc_unix.c", "pty_proc_unix.h" };
     const exclude_list = if (is_windows) &unix_only else &windows_only;
 
-    const src_dir = b.build_root.handle;
+    const src_dir = b.root.root_dir.handle;
     for (subdirs) |s| {
         var dir = try src_dir.openDir(io, b.fmt("src/nvim/{s}", .{s}), .{ .iterate = true });
         defer dir.close(io);
@@ -381,7 +381,7 @@ pub fn build(b: *std.Build) !void {
         });
         const git_describe_untrimmed = b.runAllowFail(&[_][]const u8{
             "git",
-            "-C", b.build_root.path orelse ".", // affects the --git-dir argument
+            "-C", b.root.root_dir.path orelse ".", // affects the --git-dir argument
             "--git-dir", ".git", // affected by the -C argument
             "describe", "--dirty", "--match", "v*.*.*", //
         }, &code, .ignore) catch {
@@ -489,12 +489,42 @@ pub fn build(b: *std.Build) !void {
         .link_libc = true,
     });
 
+    const translate_c = b.addTranslateC(.{
+        .root_source_file = b.path("src/nvim/garray_c_import.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+    translate_c.addIncludePath(b.path("src"));
+    translate_c.addIncludePath(gen_config.getDirectory());
+    translate_c.addIncludePath(gen_headers.getDirectory());
+    translate_c.defineCMacro("ZIG_BUILD", null);
+    translate_c.defineCMacro("_GNU_SOURCE", null);
+    if (support_unittests) translate_c.defineCMacro("UNIT_TESTING", null);
+    if (use_unibilium) translate_c.defineCMacro("HAVE_UNIBILIUM", null);
+
+    const c_mod = translate_c.createModule();
+
+    const zig_lib_mod = b.createModule(.{
+        .root_source_file = b.path("src/nvim/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    zig_lib_mod.addImport("c", c_mod);
+
+    const zig_lib = b.addLibrary(.{
+        .linkage = .static,
+        .name = "nvim_zig",
+        .root_module = zig_lib_mod,
+    });
+
     const nvim_exe = if (is_wasm) b.addLibrary(.{
         .linkage = .static,
         .name = "nvim",
         .root_module = nvim_mod,
     }) else b.addExecutable(.{ .name = "nvim", .root_module = nvim_mod });
     nvim_exe.rdynamic = true; // -E
+    nvim_mod.linkLibrary(zig_lib);
     if (emscripten_libc_path) |lp| nvim_exe.setLibCFile(lp);
     if (is_wasm) nvim_exe.entry = .disabled;
     if (is_wasm) nvim_exe.linker_allow_shlib_undefined = true;
@@ -666,13 +696,11 @@ pub fn build(b: *std.Build) !void {
 
     // run from dev environment
     const run_cmd = b.addRunArtifact(nvim_exe);
-    run_cmd.setEnvironmentVariable("VIMRUNTIME", try b.build_root.join(b.graph.arena, &.{"runtime"}));
-    run_cmd.setEnvironmentVariable("NVIM_ZIG_INSTALL_DIR", b.getInstallPath(.prefix, "runtime"));
+    run_cmd.setEnvironmentVariable("VIMRUNTIME", try b.root.joinString(b.graph.arena, "runtime"));
+    run_cmd.setEnvironmentVariable("NVIM_ZIG_INSTALL_DIR", try b.root.joinString(b.graph.arena, "zig-out/runtime"));
     run_cmd.step.dependOn(nvim_dev);
     run_cmd.addArgs(&.{ "--cmd", "let &rtp = &rtp.','.$NVIM_ZIG_INSTALL_DIR" });
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
-    }
+    run_cmd.addPassthruArgs();
     const run_step = b.step("run_dev", "run the editor (for development)");
     run_step.dependOn(&run_cmd.step);
 
@@ -852,7 +880,7 @@ fn replace_backslashes(b: *std.Build, input: []const u8) ![]const u8 {
 
 pub fn test_config(b: *std.Build) ![]u8 {
     var buf: [std.fs.max_path_bytes]u8 = std.mem.zeroes([std.fs.max_path_bytes]u8);
-    _ = try b.build_root.handle.realPath(b.graph.io, &buf);
+    _ = try b.root.root_dir.handle.realPath(b.graph.io, &buf);
     const src_path = std.mem.span(@as([*:0]u8, @ptrCast(&buf)));
 
     // we don't use test/cmakeconfig/paths.lua.in because it contains cmake specific logic
@@ -886,12 +914,12 @@ fn appendSystemIncludePath(
         &code,
         .ignore,
     );
-    if (code != 0) return std.Build.PkgConfigError.PkgConfigFailed;
+    if (code != 0) return error.PkgConfigFailed;
     var arg_it = std.mem.tokenizeAny(u8, stdout, " \r\n\t");
     while (arg_it.next()) |arg| {
         if (std.mem.eql(u8, arg, "-I")) {
             // -I /foo/bar
-            const dir = arg_it.next() orelse return std.Build.PkgConfigError.PkgConfigInvalidOutput;
+            const dir = arg_it.next() orelse return error.PkgConfigInvalidOutput;
             try path.append(b.allocator, .{ .cwd_relative = dir });
         } else if (std.mem.startsWith(u8, arg, "-I")) {
             // -I/foo/bar

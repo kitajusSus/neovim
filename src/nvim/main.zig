@@ -1,0 +1,5 @@
+const std = @import("std");
+
+comptime {
+    _ = @import("garray.zig");
+}
