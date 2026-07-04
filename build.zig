@@ -10,7 +10,7 @@ const version = struct {
     const major = 0;
     const minor = 13;
     const patch = 0;
-    const prerelease = "-dev";
+    const prerelease = "-kitajus_dev";
 
     const api_level = 15;
     const api_level_compat = 0;
