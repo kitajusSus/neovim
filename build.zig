@@ -409,7 +409,7 @@ pub fn build(b: *std.Build) !void {
 
         const dirty_tag = if (maybe_dirty) |dirty| b.fmt("-{s}", .{dirty}) else "";
 
-        break :v b.fmt("{s}-dev-{s}+{s}{s}", .{ version_string, commit_height, commit_id, dirty_tag });
+        break :v b.fmt("{s}{s}-{s}+{s}{s}", .{ version_string, version.prerelease, commit_height, commit_id, dirty_tag });
     };
 
     const versiondef_git = gen_config.add("auto/versiondef_git.h", b.fmt(
