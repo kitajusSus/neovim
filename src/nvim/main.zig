@@ -11,4 +11,5 @@ comptime {
     _ = @import("utf_index.zig");
     _ = @import("search_async.zig");
     _ = @import("shm_sync.zig");
+    _ = @import("git_sync.zig");
 }
