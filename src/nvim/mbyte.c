@@ -1646,6 +1646,7 @@ void mb_utflen(const char *s, size_t len, size_t *codepoints, size_t *codeunits)
   *codeunits += count + extra;
 }
 
+#if 0
 ssize_t mb_utf_index_to_bytes(const char *s, size_t len, size_t index, bool use_utf16_units)
   FUNC_ATTR_NONNULL_ALL
 {
@@ -1669,6 +1670,7 @@ ssize_t mb_utf_index_to_bytes(const char *s, size_t len, size_t index, bool use_
   }
   return -1;
 }
+#endif
 
 /// Version of strnicmp() that handles multi-byte characters.
 /// Needed for Big5, Shift-JIS and UTF-8 encoding.  Other DBCS encodings can

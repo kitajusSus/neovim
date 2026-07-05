@@ -8,4 +8,5 @@ comptime {
     _ = @import("arena.zig");
     _ = @import("shada_async.zig");
     _ = @import("path_cache.zig");
+    _ = @import("utf_index.zig");
 }

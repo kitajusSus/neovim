@@ -9,3 +9,4 @@
 #include "nvim/base64.h"
 #include "nvim/sha256.h"
 #include "nvim/shada.h"
+#include "nvim/mbyte.h"
