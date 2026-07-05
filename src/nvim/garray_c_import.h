@@ -6,3 +6,5 @@
 #include "nvim/strings.h"
 #include "nvim/log.h"
 #include "nvim/math.h"
+#include "nvim/base64.h"
+#include "nvim/sha256.h"

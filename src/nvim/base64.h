@@ -1,5 +1,13 @@
 #pragma once
 
-#include <stddef.h>  // IWYU pragma: keep
+#include <stddef.h>
+#include "nvim/func_attr.h"
 
-#include "base64.h.generated.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+char *base64_encode(const char *src, size_t src_len);
+char *base64_decode(const char *src, size_t src_len, size_t *out_lenp);
+#ifdef __cplusplus
+}
+#endif
