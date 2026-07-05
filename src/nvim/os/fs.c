@@ -96,6 +96,8 @@ int os_chdir(const char *path)
   int err = uv_chdir(path);
   if (err == 0) {
     ui_call_chdir(cstr_as_string(path));
+    extern void path_cache_clear(void);
+    path_cache_clear();
   }
   return err;
 }
@@ -1403,7 +1405,7 @@ bool os_fileid_equal(const FileID *file_id_1, const FileID *file_id_2)
 /// @param[in] len  The length of the buffer.
 ///
 /// @return pointer to the buf on success, or NULL.
-char *os_realpath(const char *name, char *buf, size_t len)
+char *os_realpath_nocache(const char *name, char *buf, size_t len)
   FUNC_ATTR_NONNULL_ARG(1)
 {
   uv_fs_t request;
