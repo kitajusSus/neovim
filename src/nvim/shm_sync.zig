@@ -15,6 +15,18 @@ extern fn sem_post(sem: ?*anyopaque) c_int;
 
 extern fn getpid() c_int;
 extern fn usleep(useconds: c_uint) c_int;
+extern fn get_global_lstate() ?*anyopaque;
+
+extern fn luaL_loadstring(L: ?*anyopaque, s: [*c]const u8) c_int;
+extern fn lua_pcall(L: ?*anyopaque, nargs: c_int, nresults: c_int, errfunc: c_int) c_int;
+extern fn lua_tolstring(L: ?*anyopaque, idx: c_int, len: ?*usize) [*c]const u8;
+extern fn lua_settop(L: ?*anyopaque, idx: c_int) void;
+
+const LUA_MULTRET = -1;
+
+inline fn lua_pop(L: ?*anyopaque, n: c_int) void {
+    lua_settop(L, -n - 1);
+}
 
 const O_RDWR = 2;
 const O_CREAT = 64;
@@ -45,33 +57,23 @@ var monitor_running: bool = false;
 
 var async_handle: c.uv_async_t = undefined;
 
-extern fn lua_rawgeti(L: ?*anyopaque, idx: c_int, n: c_int) void;
-extern fn lua_pcall(L: ?*anyopaque, nargs: c_int, nresults: c_int, errfunc: c_int) c_int;
-extern fn lua_tolstring(L: ?*anyopaque, idx: c_int, len: ?*usize) [*c]const u8;
-extern fn lua_settop(L: ?*anyopaque, idx: c_int) void;
-extern fn luaL_unref(L: ?*anyopaque, t: c_int, ref: c_int) void;
-
-const LUA_REGISTRYINDEX = -10000;
-
-inline fn lua_pop(L: ?*anyopaque, n: c_int) void {
-    lua_settop(L, -n - 1);
-}
-
 var last_seen_version: u32 = 0;
-var lua_callback_ref: c_int = -1;
-var lua_state_ptr: ?*anyopaque = null;
+var lua_cmd_buf: [256]u8 = undefined;
 
 fn asyncCallback(handle: ?*c.uv_async_t) callconv(.c) void {
     _ = handle;
-    const lstate = lua_state_ptr orelse return;
+    const lstate = get_global_lstate() orelse return;
 
-    if (lua_callback_ref != -1) {
-        lua_rawgeti(lstate, LUA_REGISTRYINDEX, lua_callback_ref);
-        if (lua_pcall(lstate, 0, 0, 0) != 0) {
+    if (luaL_loadstring(lstate, &lua_cmd_buf[0]) == 0) {
+        if (lua_pcall(lstate, 0, LUA_MULTRET, 0) != 0) {
             const err_msg = lua_tolstring(lstate, -1, null);
             std.log.err("SHM Sync Callback Error: {s}", .{err_msg});
             lua_pop(lstate, 1);
         }
+    } else {
+        const err_msg = lua_tolstring(lstate, -1, null);
+        std.log.err("SHM Sync Load Error: {s}", .{err_msg});
+        lua_pop(lstate, 1);
     }
 }
 
@@ -97,13 +99,14 @@ fn monitorThread() void {
 
 export fn shm_sync_init(
     session_id: [*c]const u8,
-    lstate: ?*anyopaque,
-    callback_ref: c_int,
+    lua_cmd: [*c]const u8,
 ) callconv(.c) c_int {
     if (shm_ptr != null) return 0;
 
-    lua_state_ptr = lstate;
-    lua_callback_ref = callback_ref;
+    const lua_cmd_slice = std.mem.span(lua_cmd);
+    const cmd_len = @min(lua_cmd_slice.len, lua_cmd_buf.len - 1);
+    @memcpy(lua_cmd_buf[0..cmd_len], lua_cmd_slice[0..cmd_len]);
+    lua_cmd_buf[cmd_len] = 0;
 
     const session_slice = std.mem.span(session_id);
 
@@ -224,11 +227,4 @@ export fn shm_sync_close() callconv(.c) void {
     }
 
     c.uv_close(@ptrCast(&async_handle), null);
-
-    if (lua_state_ptr) |lstate| {
-        if (lua_callback_ref != -1) {
-            luaL_unref(lstate, LUA_REGISTRYINDEX, lua_callback_ref);
-            lua_callback_ref = -1;
-        }
-    }
 }
