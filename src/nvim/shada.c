@@ -574,6 +574,9 @@ static void close_file(FileDescriptor *cookie)
 /// @param[in]  flags  Flags, see ShaDaReadFileFlags enum.
 ///
 /// @return FAIL if reading failed for some reason and OK otherwise.
+extern void *shada_async_get_preloaded(const char *requested_file, size_t *len_out);
+extern void shada_async_free(void);
+
 static int shada_read_file(const char *const file, const int flags)
   FUNC_ATTR_WARN_UNUSED_RESULT
 {
@@ -583,7 +586,17 @@ static int shada_read_file(const char *const file, const int flags)
   }
 
   FileDescriptor sd_reader;
-  int of_ret = file_open(&sd_reader, fname, kFileReadOnly, 0);
+  bool is_preloaded = false;
+  size_t preload_len = 0;
+  void *preload_buf = shada_async_get_preloaded(file, &preload_len);
+
+  int of_ret = 0;
+  if (preload_buf != NULL) {
+    file_open_buffer(&sd_reader, preload_buf, preload_len);
+  } else {
+    of_ret = file_open(&sd_reader, fname, kFileReadOnly, 0);
+    is_preloaded = false;
+  }
 
   if (p_verbose > 1) {
     verbose_enter();
@@ -608,6 +621,10 @@ static int shada_read_file(const char *const file, const int flags)
 
   shada_read(&sd_reader, flags);
   close_file(&sd_reader);
+
+  if (preload_buf != NULL) {
+    shada_async_free();
+  }
 
   return OK;
 }
@@ -1282,7 +1299,7 @@ static const char *shada_get_default_file(void)
 ///
 /// @return  An allocated string containing shada file name,
 ///          or NULL if shada file should not be used.
-static char *shada_filename(const char *file)
+char *shada_filename(const char *file)
   FUNC_ATTR_MALLOC FUNC_ATTR_WARN_UNUSED_RESULT
 {
   if (file == NULL || *file == NUL) {

@@ -11,4 +11,6 @@ typedef enum {
   kShaDaMissingError = 16,  ///< Error out when os_open returns -ENOENT.
 } ShaDaReadFileFlags;
 
+char *shada_filename(const char *file);
+
 #include "shada.h.generated.h"

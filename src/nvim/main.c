@@ -283,6 +283,11 @@ int main(int argc, char **argv)
 
   early_init(&params);
 
+  extern void shada_async_init(void);
+  if (!params.clean && p_shada && *p_shada != NUL) {
+    shada_async_init();
+  }
+
   set_argv_var(argv, argc);  // set v:argv
 
   // Check if we have an interactive window.
@@ -704,6 +709,9 @@ void os_exit(int r)
     ui_call_stop();
   }
 
+  extern void shada_async_write_join(void);
+  shada_async_write_join();
+
   if (!event_teardown() && r == 0) {
     r = 1;  // Exit with error if main_loop did not teardown gracefully.
   }
@@ -825,7 +833,8 @@ void getout(int exitval)
 #endif
       p_shada && *p_shada != NUL) {
     // Write out the registers, history, marks etc, to the ShaDa file
-    shada_write_file(NULL, false);
+    extern void shada_async_write_start(void);
+    shada_async_write_start();
   }
 
   if (v_dying <= 1) {

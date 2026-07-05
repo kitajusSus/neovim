@@ -8,3 +8,4 @@
 #include "nvim/math.h"
 #include "nvim/base64.h"
 #include "nvim/sha256.h"
+#include "nvim/shada.h"
