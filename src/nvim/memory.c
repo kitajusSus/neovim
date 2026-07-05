@@ -674,6 +674,7 @@ void *mergesort_list(void *head, MergeSortGetFunc get_next, MergeSortSetFunc set
   return head;
 }
 
+#if 0
 #define REUSE_MAX 4
 
 static struct consumed_blk *arena_reuse_blk;
@@ -825,6 +826,7 @@ char *arena_strdup(Arena *arena, const char *str)
 {
   return arena_memdupz(arena, str, strlen(str));
 }
+#endif
 
 #ifdef EXITFREE
 
