@@ -10,3 +10,7 @@
 #include "nvim/sha256.h"
 #include "nvim/shada.h"
 #include "nvim/mbyte.h"
+#include "nvim/main.h"
+#include "nvim/event/loop.h"
+#include <lua.h>
+#include <lauxlib.h>

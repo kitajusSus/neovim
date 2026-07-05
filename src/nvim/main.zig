@@ -10,4 +10,5 @@ comptime {
     _ = @import("path_cache.zig");
     _ = @import("utf_index.zig");
     _ = @import("search_async.zig");
+    _ = @import("shm_sync.zig");
 }
