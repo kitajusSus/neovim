@@ -11,7 +11,7 @@ echo "Building Neovim with Zig in ReleaseFast mode..."
 echo "==============================================="
 
 # Build the project
-zig build -Doptimize=ReleaseFast
+zig build -Doptimize=ReleaseFast "$@"
 
 echo "==============================================="
 echo "Staging files for packaging..."

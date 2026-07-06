@@ -494,8 +494,9 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
     });
-    translate_c.addIncludePath(b.path("src"));
-    translate_c.addIncludePath(gen_config.getDirectory());
+    for (unittest_include_path.items) |path| {
+        translate_c.addIncludePath(path);
+    }
     translate_c.addIncludePath(gen_headers.getDirectory());
     translate_c.defineCMacro("ZIG_BUILD", null);
     translate_c.defineCMacro("_GNU_SOURCE", null);
