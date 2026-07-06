@@ -86,3 +86,6 @@ tags
 /contrib/result-*
 
 CMakeUserPresets.json
+
+# Zig package builds
+/nvim-linux-x64-zig.tar.gz
