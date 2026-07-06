@@ -3,7 +3,7 @@
 /venv/
 compile_commands.json
 /.envrc
-
+nvim-linux-x64-zig/
 # IDEs
 /.vs/
 /.vscode/
