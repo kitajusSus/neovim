@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# nvimzig - High-performance Neovim compiled with Zig
+set -e
+
+REPO_DIR="/home/kitajusus/code/neovim"
+BIN="$REPO_DIR/zig-out/bin/nvim"
+
+if [ ! -f "$BIN" ]; then
+    echo "nvimzig binary not found. Building with zig..." >&2
+    (cd "$REPO_DIR" && zig build -Doptimize=ReleaseFast)
+fi
+
+export VIMRUNTIME="$REPO_DIR/runtime"
+exec "$BIN" "$@"

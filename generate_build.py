@@ -116,6 +116,14 @@ for f in c_files:
 build_zig += """
     b.installArtifact(exe);
 
+    // Run step: zig build run -- [args]
+    const run_cmd = b.addRunArtifact(exe);
+    run_cmd.step.dependOn(b.getInstallStep());
+    run_cmd.setEnvironmentVariable("VIMRUNTIME", "runtime");
+    run_cmd.addPassthruArgs();
+    const run_step = b.step("run", "Run Neovim (Zig)");
+    run_step.dependOn(&run_cmd.step);
+
     // tee helper executable
     const tee_exe = b.addExecutable(.{
         .name = "tee",
