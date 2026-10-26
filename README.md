@@ -1,14 +1,18 @@
 <h1 align="center">
   <img src="https://raw.githubusercontent.com/neovim/neovim.github.io/master/static/logos/neovim-logo-300x87.png" alt="Neovim">
 
-  <a href="https://neovim.io/doc/">Documentation</a> |
-  <a href="https://app.element.io/#/room/#neovim:matrix.org">Chat</a>
+<a href="https://neovim.io/doc/">Documentation</a> |
+<a href="https://app.element.io/#/room/#neovim:matrix.org">Chat</a>
 </h1>
 
 [![Coverity Scan analysis](https://scan.coverity.com/projects/2227/badge.svg)](https://scan.coverity.com/projects/2227)
 [![Packages](https://repology.org/badge/tiny-repos/neovim.svg)](https://repology.org/metapackage/neovim)
 [![Debian CI](https://badges.debian.net/badges/debian/testing/neovim/version.svg)](https://buildd.debian.org/neovim)
 [![Downloads](https://img.shields.io/github/downloads/neovim/neovim/total.svg?maxAge=2592001)](https://github.com/neovim/neovim/releases/)
+
+> im just vibe coding sometimes this for various ideas to check How does the new
+> models perform overall in coding. Dont use this, main nvim package is
+> amazing and well maintained with new Features and so on.
 
 Neovim is a project that seeks to aggressively refactor [Vim](https://www.vim.org/) in order to:
 
@@ -50,12 +54,14 @@ See [BUILD.md](./BUILD.md) and [supported platforms](https://neovim.io/doc/user/
 
 The build is CMake-based, but a Makefile is provided as a convenience.
 After installing the dependencies, run the following command.
+
 ```bash
 make CMAKE_BUILD_TYPE=RelWithDebInfo
 sudo make install
 ```
 
 To install to a non-default location:
+
 ```bash
 make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_INSTALL_PREFIX=/full/path/
 make install
