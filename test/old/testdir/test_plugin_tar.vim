@@ -2,7 +2,7 @@
 CheckExecutable tar
 CheckNotMSWindows
 
-runtime plugin/tarPlugin.vim
+runtime plugin/tarPlugin.lua
 
 func s:CopyFile(source)
   if !filecopy($"samples/{a:source}", "X.tar")

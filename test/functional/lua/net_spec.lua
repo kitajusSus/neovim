@@ -141,7 +141,7 @@ describe('vim.net.request', function()
 
     local rv = exec_lua(function()
       vim.cmd('runtime! plugin/net.lua')
-      vim.cmd('runtime! plugin/tarPlugin.vim')
+      vim.cmd('runtime! plugin/tarPlugin.lua')
 
       vim.cmd(
         'edit https://github.com/neovim/neovim/releases/download/nightly/nvim-macos-x86_64.tar.gz'
@@ -168,7 +168,7 @@ describe('vim.net.request', function()
 
     local rv = exec_lua(function()
       vim.cmd('runtime! plugin/net.lua')
-      vim.cmd('runtime! plugin/zipPlugin.vim')
+      vim.cmd('runtime! plugin/zipPlugin.lua')
 
       vim.cmd('edit https://github.com/neovim/neovim/releases/download/nightly/nvim-win-arm64.zip')
 

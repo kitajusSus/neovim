@@ -1,0 +1,72 @@
+name: Zig CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  zig-build:
+    name: Build & Smoke Test (Linux x64)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            gettext \
+            inotify-tools \
+            tar \
+            curl
+
+      - name: Set up Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: Verify Zig installation
+        run: |
+          zig version
+          zig env
+
+      - name: Build and Package Neovim
+        run: |
+          chmod +x package.sh
+          ./package.sh
+
+      - name: Smoke Test (zig-out binary)
+        run: |
+          ./zig-out/bin/nvim --version
+          ./zig-out/bin/nvim --headless +"lua print('Zig CI OK')" +q
+
+      - name: Smoke Test (packaged bundle)
+        run: |
+          tar -xzf nvim-linux-x64-zig.tar.gz
+          ./nvim-linux-x64-zig/bin/nvim --version
+          ./nvim-linux-x64-zig/bin/nvim --headless +"lua print('Zig CI OK (Relocatable Package)')" +q
+
+      - name: Upload Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvim-linux-x64-zig
+          path: nvim-linux-x64-zig.tar.gz
+          retention-days: 7

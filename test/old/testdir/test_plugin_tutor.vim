@@ -6,7 +6,7 @@ source script_util.vim
 
 func SetUp()
   set nocompatible
-  runtime plugin/tutor.vim
+  runtime plugin/tutor.lua
 endfunc
 
 func Test_auto_enable_interactive()
@@ -41,7 +41,7 @@ func Test_mark()
   CheckScreendump
   call writefile([
   \ 'set nocompatible',
-  \ 'runtime plugin/tutor.vim',
+  \ 'runtime plugin/tutor.lua',
   \ 'Tutor tutor',
   \ 'set statusline=',
   \ ], 'Xtest_plugin_tutor_mark', 'D')
