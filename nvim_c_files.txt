@@ -48,9 +48,7 @@ src/nvim/map_glyph_cache.c
 src/nvim/viml/parser/parser.c
 src/nvim/viml/parser/expressions.c
 src/nvim/tag.c
-src/nvim/os/pty_conpty_win.c
 src/nvim/os/lang.c
-src/nvim/os/os_win_console.c
 src/nvim/os/fs.c
 src/nvim/os/shell.c
 src/nvim/os/proc.c
@@ -63,7 +61,6 @@ src/nvim/os/env.c
 src/nvim/os/pty_proc_unix.c
 src/nvim/os/signal.c
 src/nvim/os/time.c
-src/nvim/os/pty_proc_win.c
 src/nvim/os/fileio.c
 src/nvim/msgpack_rpc/unpacker.c
 src/nvim/msgpack_rpc/channel.c

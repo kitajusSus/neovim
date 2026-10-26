@@ -12,4 +12,5 @@ comptime {
     _ = @import("search_async.zig");
     _ = @import("shm_sync.zig");
     _ = @import("git_sync.zig");
+    _ = @import("tui/zig_tui.zig");
 }
