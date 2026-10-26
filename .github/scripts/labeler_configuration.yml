@@ -60,7 +60,7 @@ mouse:
 
 netrw:
   - changed-files:
-    - any-glob-to-any-file: [ runtime/autoload/netrw.vim, runtime/plugin/netrwPlugin.vim ]
+    - any-glob-to-any-file: [ runtime/autoload/netrw.vim, runtime/plugin/netrwPlugin.lua ]
 
 plugin-editorconfig:
   - changed-files:

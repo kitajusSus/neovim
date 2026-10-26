@@ -16,7 +16,11 @@ local function check(cmd)
     f = 1
   end
   if f == 0 or f == false then
-    vim.api.nvim_echo({ { 'Warning: NOT executing ' .. name .. ' from current directory!', 'ErrorMsg' } }, true, {})
+    vim.api.nvim_echo(
+      { { 'Warning: NOT executing ' .. name .. ' from current directory!', 'ErrorMsg' } },
+      true,
+      {}
+    )
   end
 
   local e = vim.fn.executable(name)
@@ -48,7 +52,10 @@ end
 
 local function samedir_tempname(name)
   local tmp = vim.fn.tempname()
-  return vim.fn.fnamemodify(name, ':p:h') .. '/' .. vim.fn.fnamemodify(tmp, ':h:t') .. vim.fn.fnamemodify(tmp, ':t')
+  return vim.fn.fnamemodify(name, ':p:h')
+    .. '/'
+    .. vim.fn.fnamemodify(tmp, ':h:t')
+    .. vim.fn.fnamemodify(tmp, ':t')
 end
 
 local function tempname(name)
@@ -178,7 +185,9 @@ function M.appre(cmd)
     local nmte = nmt .. '.' .. vim.fn.expand('<afile>:e')
     if vim.fn.rename(nm, nmte) == 0 then
       if vim.o.patchmode ~= '' and vim.fn.getfsize(nm .. vim.o.patchmode) == -1 then
-        vim.fn.system(cmd .. ' -c -- ' .. vim.fn.shellescape(nmte) .. ' > ' .. vim.fn.shellescape(nmt))
+        vim.fn.system(
+          cmd .. ' -c -- ' .. vim.fn.shellescape(nmte) .. ' > ' .. vim.fn.shellescape(nmt)
+        )
         vim.fn.rename(nmte, nm .. vim.o.patchmode)
       else
         vim.fn.system(cmd .. ' -- ' .. vim.fn.shellescape(nmte))

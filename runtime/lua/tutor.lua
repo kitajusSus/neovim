@@ -189,7 +189,8 @@ function M.glob_tutorials(name, locale)
   local rtp_str = table.concat(rtp, ',')
 
   local tutors = vim.fn.globpath(rtp_str, 'tutor/' .. name .. '.tutor', 1, 1)
-  local locale_tutors = vim.fn.globpath(rtp_str, 'tutor/' .. locale .. '/' .. name .. '.tutor', 1, 1)
+  local locale_tutors =
+    vim.fn.globpath(rtp_str, 'tutor/' .. locale .. '/' .. name .. '.tutor', 1, 1)
   if #locale_tutors == 0 then
     locale_tutors = vim.fn.globpath(rtp_str, 'tutor/en/' .. name .. '.tutor', 1, 1)
   end
@@ -251,7 +252,11 @@ function M.tutor_cmd(name)
     local candidates = { 'Several tutorials with that name found. Select one:' }
     local loc = get_locale()[1]
     for idx, candidate in ipairs(tutors) do
-      local display = vim.fn.fnamemodify(candidate, ':h:h:t') .. '/' .. loc .. '/' .. vim.fn.fnamemodify(candidate, ':t')
+      local display = vim.fn.fnamemodify(candidate, ':h:h:t')
+        .. '/'
+        .. loc
+        .. '/'
+        .. vim.fn.fnamemodify(candidate, ':t')
       table.insert(candidates, idx .. '. ' .. display)
     end
     local tutor_to_open = vim.fn.inputlist(candidates)
