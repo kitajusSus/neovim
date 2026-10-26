@@ -50,6 +50,8 @@
 # include "nvim/os/os_win_console.h"
 #endif
 
+extern size_t diff_cells_zig_simd(const void* old_cells, const void* new_cells, size_t count);
+
 // Maximum amount of time (in ms) to wait to receive a Device Attributes
 // response before exiting.
 #define EXIT_TIMEOUT_MS 1000
@@ -1081,6 +1083,8 @@ static void print_cell(TUIData *tui, char *buf, sattr_T attr)
 
 static bool cheap_to_print(TUIData *tui, int row, int col, int next)
 {
+  diff_cells_zig_simd(NULL, NULL, 0);
+
   UGrid *grid = &tui->grid;
   UCell *cell = grid->cells[row] + col;
   while (next) {
